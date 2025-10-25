@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code the Robot!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .game-area {
+            background: #f0f4ff;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 300px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            border: 3px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .cell.star {
+            background: #ffd700;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+        
+        .btn-up { background: #4CAF50; color: white; }
+        .btn-down { background: #2196F3; color: white; }
+        .btn-left { background: #FF9800; color: white; }
+        .btn-right { background: #9C27B0; color: white; }
+        .btn-go { background: #f44336; color: white; grid-column: span 3; }
+        .btn-reset { background: #666; color: white; grid-column: span 3; }
+        
+        .command-list {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 60px;
+        }
+        
+        .command-item {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .message {
+            text-align: center;
+            font-size: 1.3em;
+            color: #333;
+            padding: 15px;
+            border-radius: 15px;
+            background: #fff3cd;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .cta {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+        }
+        
+        .cta h3 {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Code the Robot!</h1>
+            <p class="subtitle">Program your robot to collect all the stars!</p>
+        </div>
+        
+        <div class="game-area">
+            <div class="grid" id="grid"></div>
+            
+            <div class="command-list" id="commandList">
+                <strong>Your Code:</strong>
+            </div>
+            
+            <div class="controls">
+                <div></div>
+                <button class="btn btn-up" onclick="addCommand('UP')">⬆️ UP</button>
+                <div></div>
+                <button class="btn btn-left" onclick="addCommand('LEFT')">⬅️ LEFT</button>
+                <button class="btn btn-down" onclick="addCommand('DOWN')">⬇️ DOWN</button>
+                <button class="btn btn-right" onclick="addCommand('RIGHT')">➡️ RIGHT</button>
+                <button class="btn btn-go" onclick="runCode()">▶️ RUN CODE!</button>
+                <button class="btn btn-reset" onclick="resetGame()">🔄 RESET</button>
+            </div>
+            
+            <div class="score">Stars: <span id="score">0</span>/3 | Level: <span id="level">1</span></div>
+            <div class="message" id="message"></div>
+        </div>
+        
+        <div class="cta">
+            <h3>🌟 Want to Learn Real Coding?</h3>
+            <p>Join Learnix Academy and create amazing games, apps, and more!</p>
+        </div>
+    </div>
+    
+    <script>
+        let robotPos = {x: 0, y: 0};
+        let commands = [];
+        let stars = [];
+        let score = 0;
+        let level = 1;
+        let isRunning = false;
+        
+        const levels = [
+            [{x: 2, y: 0}, {x: 4, y: 2}, {x: 2, y: 4}],
+            [{x: 0, y: 4}, {x: 4, y: 0}, {x: 2, y: 2}],
+            [{x: 1, y: 1}, {x: 3, y: 1}, {x: 2, y: 3}]
+        ];
+        
+        function initGame() {
+            robotPos = {x: 0, y: 0};
+            commands = [];
+            stars = [...levels[level - 1]];
+            updateGrid();
+            updateCommandList();
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            hideMessage();
+        }
+        
+        function updateGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
+            for (let y = 0; y < 5; y++) {
+                for (let x = 0; x < 5; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    if (x === robotPos.x && y === robotPos.y) {
+                        cell.textContent = '🤖';
+                    } else if (stars.some(s => s.x === x && s.y === y)) {
+                        cell.textContent = '⭐';
+                        cell.classList.add('star');
+                    }
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+        
+        function addCommand(cmd) {
+            if (isRunning) return;
+            commands.push(cmd);
+            updateCommandList();
+        }
+        
+        function updateCommandList() {
+            const list = document.getElementById('commandList');
+            list.innerHTML = '<strong>Your Code:</strong> ';
+            
+            const colors = {
+                'UP': '#4CAF50',
+                'DOWN': '#2196F3',
+                'LEFT': '#FF9800',
+                'RIGHT': '#9C27B0'
+            };
+            
+            commands.forEach(cmd => {
+                const span = document.createElement('span');
+                span.className = 'command-item';
+                span.textContent = cmd;
+                span.style.background = colors[cmd];
+                list.appendChild(span);
+            });
+        }
+        
+        async function runCode() {
+            if (isRunning || commands.length === 0) return;
+            isRunning = true;
+            hideMessage();
+            
+            const startPos = {...robotPos};
+            
+            for (let cmd of commands) {
+                await sleep(400);
+                
+                switch(cmd) {
+                    case 'UP':
+                        if (robotPos.y > 0) robotPos.y--;
+                        break;
+                    case 'DOWN':
+                        if (robotPos.y < 4) robotPos.y++;
+                        break;
+                    case 'LEFT':
+                        if (robotPos.x > 0) robotPos.x--;
+                        break;
+                    case 'RIGHT':
+                        if (robotPos.x < 4) robotPos.x++;
+                        break;
+                }
+                
+                // Check for star collection
+                const starIndex = stars.findIndex(s => s.x === robotPos.x && s.y === robotPos.y);
+                if (starIndex !== -1) {
+                    stars.splice(starIndex, 1);
+                    score++;
+                    document.getElementById('score').textContent = score;
+                }
+                
+                updateGrid();
+            }
+            
+            await sleep(500);
+            
+            if (stars.length === 0) {
+                showMessage('🎉 Amazing! You collected all stars!', true);
+                await sleep(2000);
+                
+                if (level < 3) {
+                    level++;
+                    score = 0;
+                    showMessage('🚀 Level Up! Get ready for Level ' + level, true);
+                    await sleep(2000);
+                    initGame();
+                } else {
+                    showMessage('🏆 YOU WIN! You\'re a coding master!', true);
+                }
+            } else {
+                showMessage('Try again! You missed ' + stars.length + ' star(s)', false);
+                robotPos = startPos;
+                stars = [...levels[level - 1]];
+                score = 0;
+                document.getElementById('score').textContent = score;
+                updateGrid();
+            }
+            
+            commands = [];
+            updateCommandList();
+            isRunning = false;
+        }
+        
+        function resetGame() {
+            level = 1;
+            score = 0;
+            initGame();
+        }
+        
+        function showMessage(text, success) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = 'message show' + (success ? ' success' : '');
+        }
+        
+        function hideMessage() {
+            document.getElementById('message').classList.remove('show');
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        initGame();
+    </script>
+</body>
+</html>
